@@ -20,17 +20,18 @@ else
 endif
 
 #CXXFLAGS = -Wall -Wno-unknown-pragmas -Winline $(DBG) $(OPT) 
-CXXFLAGS = -Wno-unknown-pragmas $(DBG) $(OPT) 
+CXXFLAGS = -Wno-unknown-pragmas $(DBG) $(OPT) -I include
 CXX = g++ -m64
 CC  = gcc -m64
 
-SRCS  = area.cc bank.cc mat.cc main.cc Ucache.cc io.cc technology.cc basic_circuit.cc parameter.cc \
+CXX_SRCS = area.cc bank.cc mat.cc main.cc Ucache.cc io.cc technology.cc basic_circuit.cc parameter.cc \
 		decoder.cc component.cc uca.cc subarray.cc wire.cc htree2.cc extio.cc extio_technology.cc \
 		cacti_interface.cc router.cc nuca.cc crossbar.cc arbiter.cc powergating.cc TSV.cc memorybus.cc \
 		memcad.cc memcad_parameters.cc
-		
 
-OBJS = $(patsubst %.cc,obj_$(TAG)/%.o,$(SRCS))
+SRCS  = $(foreach src, $(CXX_SRCS), src/$(src))
+
+OBJS = $(patsubst %.cc, obj_$(TAG)/%.o, $(CXX_SRCS))
 PYTHONLIB_SRCS = $(patsubst main.cc, ,$(SRCS)) obj_$(TAG)/cacti_wrap.cc
 PYTHONLIB_OBJS = $(patsubst %.cc,%.o,$(PYTHONLIB_SRCS)) 
 INCLUDES       = -I /usr/include/python2.4 -I /usr/lib/python2.4/config
@@ -44,10 +45,8 @@ obj_$(TAG)/$(TARGET) : $(OBJS)
 #obj_$(TAG)/%.o : %.cc
 #	$(CXX) -c $(CXXFLAGS) $(INCS) -o $@ $<
 
-obj_$(TAG)/%.o : %.cc
+obj_$(TAG)/%.o : src/%.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
 	-rm -f *.o _cacti.so cacti.py $(TARGET)
-
-
